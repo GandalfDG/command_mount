@@ -26,29 +26,32 @@ mounting_base = (cq.Workplane("XY")
                       base_thickness)
                  .edges("|Z").fillet(2).faces(">Z").fillet(.5))
 
-def generate_keyhole():
+
+def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, edge_thickness, tolerance=.25):
     obj = cq.Workplane()
 
-    keyhole_radius = keyhole_diameter_narrow / 2 - tolerance
-    keyhole_slot_depth = keyhole_edge_depth + bump_radius - tolerance
+    slot_radius = narrow_diameter / 2 - tolerance
+    keyhole_slot_depth = edge_thickness - tolerance
 
     # create the narrow keyhole slot
-    obj = obj.slot2D(keyhole_length, keyhole_diameter_narrow - tolerance*2, 0).extrude(keyhole_slot_depth)
+    obj = obj.slot2D(slot_length, narrow_diameter -
+                     tolerance*2, 0).extrude(keyhole_slot_depth)
 
     # create the wide keyhole button
-    obj = obj.faces(">Z").workplane().center(keyhole_length/2 - keyhole_radius,0).tag("button_center")
-    obj = obj.circle(keyhole_diameter_wide/2 - tolerance).extrude(keyhole_full_depth - keyhole_slot_depth - tolerance)
-    
-    # create retaining nubs
-    obj = obj.workplaneFromTagged("button_center").rect(0,keyhole_diameter_wide-tolerance - 2 * bump_inset)
-    obj = obj.vertices().sphere(bump_radius)
+    obj = obj.faces(">Z").workplane().center(
+        slot_length/2 - slot_radius, 0).tag("button_center")
+    obj = obj.circle(wide_diameter/2 - tolerance).extrude(
+        slot_depth - keyhole_slot_depth - tolerance)
 
     # fillet liberally
     obj = obj.faces("|Z and (not <Z)").fillet(.33)
 
     return obj
 
+
 # mounting_base = mounting_base.faces(">Z").workplane().union(generate_keyhole())
-mounting_base = mounting_base.union(generate_keyhole().translate((mounting_strip_height/2 - 2*keyhole_diameter_wide,0,base_thickness/2)))
+mounting_base = mounting_base.union(
+    generate_keyhole(keyhole_diameter_wide, keyhole_diameter_narrow, keyhole_full_depth, keyhole_length, keyhole_edge_depth).translate(
+        (mounting_strip_height/2 - 2*keyhole_diameter_wide, 0, base_thickness/2)))
 
 show_object(mounting_base)
