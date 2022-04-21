@@ -27,7 +27,7 @@ mounting_base = (cq.Workplane("XY")
                  .edges("|Z").fillet(2).faces(">Z").fillet(.5))
 
 
-def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, edge_thickness, tolerance=.25):
+def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, edge_thickness, fillet=.33, tolerance=.25):
     obj = cq.Workplane()
 
     slot_radius = narrow_diameter / 2 - tolerance
@@ -35,16 +35,16 @@ def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, ed
 
     # create the narrow keyhole slot
     obj = obj.slot2D(slot_length, narrow_diameter -
-                     tolerance*2, 0).extrude(keyhole_slot_depth)
+                     tolerance*2, 90).extrude(keyhole_slot_depth)
 
     # create the wide keyhole button
     obj = obj.faces(">Z").workplane().center(
-        slot_length/2 - slot_radius, 0).tag("button_center")
+         0, slot_length/2 - slot_radius,).tag("button_center")
     obj = obj.circle(wide_diameter/2 - tolerance).extrude(
         slot_depth - keyhole_slot_depth - tolerance)
 
     # fillet liberally
-    obj = obj.faces("|Z and (not <Z)").fillet(.33)
+    obj = obj.faces("|Z and (not <Z)").fillet(fillet)
 
     return obj
 
@@ -53,5 +53,3 @@ def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, ed
 mounting_base = mounting_base.union(
     generate_keyhole(keyhole_diameter_wide, keyhole_diameter_narrow, keyhole_full_depth, keyhole_length, keyhole_edge_depth).translate(
         (mounting_strip_height/2 - 2*keyhole_diameter_wide, 0, base_thickness/2)))
-
-show_object(mounting_base)
