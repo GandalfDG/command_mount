@@ -1,9 +1,11 @@
 import cadquery as cq
 
-def keyhole(self, wide_diameter, narrow_diameter, slot_depth, slot_length, edge_thickness, fillet=.33, tolerance=.25):
+def keyhole(self, wide_diameter, narrow_diameter, slot_depth, edge_thickness, slot_length=None, fillet=0, tolerance=.25):
+
+    slot_length = slot_length if slot_length else wide_diameter/2
 
     def generate_keyhole():
-        obj = self
+        obj = self.newObject()
 
         slot_radius = narrow_diameter / 2 - tolerance
         keyhole_slot_depth = edge_thickness - tolerance
@@ -19,8 +21,11 @@ def keyhole(self, wide_diameter, narrow_diameter, slot_depth, slot_length, edge_
             slot_depth - keyhole_slot_depth - tolerance)
 
         # fillet liberally
-        obj = obj.faces("|Z and (not <Z)").fillet(fillet)
+        # obj = obj.faces("|Z and (not <Z)").fillet(fillet)
 
-        return obj
+        # return obj.move(*loc.toTuple()[0])
+        return obj.val()
+    
+    return self.eachpoint(lambda loc:generate_keyhole().moved(loc))
 
-    return self.eachpoint(lambda loc: self.moveTo(loc).generate_keyhole(),True)
+cq.Workplane.keyhole = keyhole
