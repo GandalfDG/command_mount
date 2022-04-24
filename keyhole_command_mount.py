@@ -31,7 +31,8 @@ def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, ed
     obj = cq.Workplane()
 
     slot_radius = narrow_diameter / 2 - tolerance
-    keyhole_slot_depth = edge_thickness - tolerance
+    keyhole_slot_depth = edge_thickness + tolerance
+    button_thickness = slot_depth - keyhole_slot_depth  - tolerance
 
     # create the narrow keyhole slot
     obj = obj.slot2D(slot_length, narrow_diameter -
@@ -40,8 +41,7 @@ def generate_keyhole(wide_diameter, narrow_diameter, slot_depth, slot_length, ed
     # create the wide keyhole button
     obj = obj.faces(">Z").workplane().center(
          0, slot_length/2 - slot_radius,).tag("button_center")
-    obj = obj.circle(wide_diameter/2 - tolerance).extrude(
-        slot_depth - keyhole_slot_depth - tolerance)
+    obj = obj.circle(wide_diameter/2 - tolerance).extrude(button_thickness)
 
     # fillet liberally
     obj = obj.faces("|Z and (not <Z)").fillet(fillet)

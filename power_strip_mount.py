@@ -14,7 +14,7 @@ large_diameter = 8.1
 small_diameter = 4.2
 depth = 5.25
 length = 27
-thickness = 2
+thickness = 2.5
 separation = 29.2
 
 tolerance = .25
